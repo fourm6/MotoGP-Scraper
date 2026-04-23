@@ -1,37 +1,18 @@
-# MotoGP results ingester
+*disclaimer this code was created using help of AI, I just needed the database for another project and I got lazy*
 
-This script crawls the public Pulse Live MotoGP API using:
+# MotoGP Scraper
 
-1. `v1/results/events?seasonUuid=...&isFinished=true`
-2. `v1/results/sessions?eventUuid=...&categoryUuid=...`
-3. `v2/results/classifications?session=...&test=false`
-
-It writes both:
-- raw JSON payloads for each classification fetch
-- normalized tables in SQLite for seasons, events, categories, sessions, and classification entries
+Script grabs all race classification data requested from MotoGP website
 
 ## Files
 
-- `motogp_results_ingest.py` — main crawler
-- `season_uuids.example.json` — template input for season UUIDs
+- `motogp_scraper.py` — main crawler
 
-## Install
+## Required libraries
 
 ```bash
 pip install requests
 ```
-
-## Prepare season UUIDs
-
-Create a file like:
-
-```json
-[
-  {"year": 2025, "uuid": "632718a6-f1fe-4f5a-b95d-03b8e7635d70"}
-]
-```
-
-Or a plain text file with one UUID per line.
 
 ## Run
 
@@ -42,7 +23,7 @@ python motogp_results_ingest.py \
   --sleep-seconds 0.75
 ```
 
-To ingest every session type instead of race-like sessions only:
+To scrape every session type instead of just race sessions:
 
 ```bash
 python motogp_results_ingest.py \
@@ -51,22 +32,32 @@ python motogp_results_ingest.py \
   --all-sessions
 ```
 
-## What the database contains
+## Database structure
 
-### `classification_fetches`
-One row per fetched classification payload.
+### `seasons_events.jsonl`
+- fetched_at
+- source_urls
+- events_url
+- categories_url
+- season, year
+- event
+- country_name
+- circuit_name
+- start_date
+- event_files...
 
-### `classification_entries`
-One row per rider/result entry, with fields such as:
-- position
-- rider name
-- rider number
-- team name
-- constructor/bike
-- time/gaps
-- points
-- status
+### `classifications.jsonl`
+- fetched_at
+- source_url
+- season_uuid
+- season_year
+- event_uuid
+- event_short_name
+- event_name
+- category_uuid
+- category_name
+- session_name
+- session_code
+- entries
 
-## Suggested next step
 
-Once you verify the exact field names in a few returned payloads, tighten the extractor in `extract_classification_entries()` and the normalization logic in `replace_classification_entries()` to match the live schema exactly.
