@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MotoGP results ingester writing two JSONL output files.
+"""MotoGP results scraper writing two JSONL output files.
 
 Flow used:
     seasons -> events -> categories -> sessions -> classifications
